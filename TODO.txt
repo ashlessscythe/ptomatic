@@ -1,0 +1,61 @@
+# Project: pto-matic - Incremental Build Steps with Tollgate Deployments
+
+## Setup (Tollgate 1 - Initial Setup & Basic Authentication)
+- [ ] Set up repository (`pto-matic`) and initialize with Next.js and Prisma.
+- [ ] Install dependencies for Next.js, ShadCN UI, and Prisma.
+- [ ] Configure environment variables (refer to `env.example`).
+- [ ] Set up Neon.tech database and Clerk.dev for authentication.
+- [ ] Implement Clerk SSO login and create a simple landing page with a pending screen for new users.
+- [ ] Configure Prisma models for basic tables (`User`, `Department`, `PTORequest`) and run initial migration.
+- [ ] Deploy the initial version to verify environment configuration and basic auth functionality.
+
+## User & Admin Workflows (Tollgate 2 - User Onboarding and Basic PTO Requests)
+- [ ] Develop User Registration flow:
+   - [ ] Direct new users to the pending page after SSO login.
+   - [ ] Add logic for admins to review new users and assign them to managers, departments, and PTO balances.
+- [ ] Build User Dashboard with:
+   - [ ] PTO request submission form.
+   - [ ] Display pending, approved, and denied requests.
+- [ ] Implement the Admin Panel basics:
+   - [ ] User management (approve/deny pending users).
+   - [ ] PTO request review and status updates.
+- [ ] Set up email notifications with Clerk and add the (resend) button for all email notifications.
+- [ ] Deploy for testing and gather feedback on the user and admin workflows.
+
+## Manager & Approver Roles (Tollgate 3 - Role-Based Access & Manager Approvals)
+- [ ] Add role-based access to the app (User, Admin, Manager, Approver).
+- [ ] Update database schema to include relationships:
+   - [ ] **Managers to Users** (one-to-many)
+   - [ ] **Approvers to Departments** (many-to-one)
+   - [ ] **Users to Departments** (many-to-one)
+- [ ] Develop Manager Dashboard:
+   - [ ] Managers can view PTO requests and balances for their team.
+- [ ] Build Department Approver functionality:
+   - [ ] Approvers handle PTO requests within their department only.
+- [ ] Deploy and test functionality with managers and department approvers.
+
+## Notifications & Reporting (Tollgate 4 - Notifications, Resend Feature & Reporting)
+- [ ] Implement notification system:
+   - [ ] In-app notifications for real-time updates.
+   - [ ] Email notifications for key actions (e.g., request submission, status updates).
+   - [ ] (Resend) option for emails in the Admin Panel.
+- [ ] Build basic reporting and insights:
+   - [ ] PTO usage trends, requests by department, and balance adjustments.
+   - [ ] Exportable reports for admin use.
+- [ ] Deploy for testing notifications and reporting functions.
+
+## Migration & Final Testing (Tollgate 5 - Data Migration & Final Refinements)
+- [ ] Implement data migration script:
+   - [ ] Map and import existing user and PTO data from the old app.
+- [ ] Conduct final data checks to ensure accuracy post-migration.
+- [ ] Perform end-to-end testing for all workflows, roles, and notifications.
+- [ ] Deploy to staging for final testing and feedback.
+
+## Final Deployment (Tollgate 6 - Production-Ready Release)
+- [ ] Set up production deployment.
+- [ ] Prepare and review documentation (Markdown files for workflow, tech stack, features, design, and more).
+- [ ] Launch `pto-matic` in production.
+
+# Post-Deployment
+- [ ] Monitor and resolve any post-deployment issues.
+- [ ] Continue iterating based on user feedback.
