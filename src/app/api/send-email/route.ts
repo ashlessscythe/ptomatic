@@ -17,9 +17,10 @@ export async function POST(request: Request) {
     } = body;
 
     const data = await resend.emails.send({
-      from: "PTO-matic <base@resend.dev>",
+      from: "PTO-matic <onboarding@resend.dev>",
       to: [to],
       subject: `PTO Request ${status === "PENDING" ? "Submitted" : status}`,
+      text: "", // Required by Resend
       react: PTORequestEmail({
         userName,
         startDate: new Date(startDate),
