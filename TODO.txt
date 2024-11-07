@@ -1,12 +1,12 @@
 # Project: pto-matic - Incremental Build Steps with Tollgate Deployments
 
-## Setup (Tollgate 1 - Initial Setup & Basic Authentication)
-- [ ] Set up repository (`pto-matic`) and initialize with Next.js and Prisma.
-- [ ] Install dependencies for Next.js, ShadCN UI, and Prisma.
-- [ ] Configure environment variables (refer to `env.example`).
-- [ ] Set up Neon.tech database and Clerk.dev for authentication.
-- [ ] Implement Clerk SSO login and create a simple landing page with a pending screen for new users.
-- [ ] Configure Prisma models for basic tables (`User`, `Department`, `PTORequest`) and run initial migration.
+## Setup (Tollgate 1 - Initial Setup & Basic Authentication) ✅
+- [x] Set up repository (`pto-matic`) and initialize with Next.js and Prisma.
+- [x] Install dependencies for Next.js, ShadCN UI, and Prisma.
+- [x] Configure environment variables (refer to `env.example`).
+- [x] Set up Neon.tech database and Clerk.dev for authentication.
+- [x] Implement Clerk SSO login and create a simple landing page with a pending screen for new users.
+- [x] Configure Prisma models for basic tables (`User`, `Department`, `PTORequest`) and run initial migration.
 - [ ] Deploy the initial version to verify environment configuration and basic auth functionality.
 
 ## User & Admin Workflows (Tollgate 2 - User Onboarding and Basic PTO Requests)
