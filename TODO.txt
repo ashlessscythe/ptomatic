@@ -7,20 +7,20 @@
 - [x] Set up Neon.tech database and Clerk.dev for authentication.
 - [x] Implement Clerk SSO login and create a simple landing page with a pending screen for new users.
 - [x] Configure Prisma models for basic tables (`User`, `Department`, `PTORequest`) and run initial migration.
-- [ ] Deploy the initial version to verify environment configuration and basic auth functionality.
+- [x] Deploy the initial version to verify environment configuration and basic auth functionality.
 
-## User & Admin Workflows (Tollgate 2 - User Onboarding and Basic PTO Requests)
-- [ ] Develop User Registration flow:
-   - [ ] Direct new users to the pending page after SSO login.
-   - [ ] Add logic for admins to review new users and assign them to managers, departments, and PTO balances.
-- [ ] Build User Dashboard with:
-   - [ ] PTO request submission form.
-   - [ ] Display pending, approved, and denied requests.
-- [ ] Implement the Admin Panel basics:
-   - [ ] User management (approve/deny pending users).
-   - [ ] PTO request review and status updates.
-- [ ] Set up email notifications with Clerk and add the (resend) button for all email notifications.
-- [ ] Deploy for testing and gather feedback on the user and admin workflows.
+## User & Admin Workflows (Tollgate 2 - User Onboarding and Basic PTO Requests) ✅
+- [x] Develop User Registration flow:
+   - [x] Direct new users to the pending page after SSO login.
+   - [x] Add logic for admins to review new users and assign them to managers, departments, and PTO balances.
+- [x] Build User Dashboard with:
+   - [x] PTO request submission form.
+   - [x] Display pending, approved, and denied requests.
+- [x] Implement the Admin Panel basics:
+   - [x] User management (approve/deny pending users).
+   - [x] PTO request review and status updates.
+- [x] Set up email notifications with Resend and add templates for notifications.
+- [x] Deploy for testing and gather feedback on the user and admin workflows.
 
 ## Manager & Approver Roles (Tollgate 3 - Role-Based Access & Manager Approvals)
 - [ ] Add role-based access to the app (User, Admin, Manager, Approver).
