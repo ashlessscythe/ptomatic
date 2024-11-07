@@ -68,6 +68,8 @@ export async function createPTORequest(
       },
     });
 
+    console.log(`Request: ${ptoRequest}`);
+
     // Send email notification
     await sendPTOEmail({
       to: user.email,
