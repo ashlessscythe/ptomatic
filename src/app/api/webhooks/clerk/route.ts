@@ -107,16 +107,36 @@ async function handleWebhook(evt: WebhookEvent) {
           throw new Error("No email address found for user");
         }
 
-        // Update user details in our database when they update in Clerk
-        await prisma.user.update({
+        // Check if user exists first
+        const existingUser = await prisma.user.findUnique({
           where: { id: userData.id },
-          data: {
-            email,
-            name: `${userData.first_name || ""} ${
-              userData.last_name || ""
-            }`.trim(),
-          },
         });
+
+        if (existingUser) {
+          // Update user details in our database when they update in Clerk
+          await prisma.user.update({
+            where: { id: userData.id },
+            data: {
+              email,
+              name: `${userData.first_name || ""} ${
+                userData.last_name || ""
+              }`.trim(),
+            },
+          });
+        } else {
+          // Create user if they don't exist
+          await prisma.user.create({
+            data: {
+              id: userData.id,
+              email,
+              name: `${userData.first_name || ""} ${
+                userData.last_name || ""
+              }`.trim(),
+              role: "USER",
+              ptoBalance: 0,
+            },
+          });
+        }
         break;
       }
 
@@ -124,19 +144,38 @@ async function handleWebhook(evt: WebhookEvent) {
       case "organizationMembership.updated": {
         const membershipData = evt.data;
         const role = membershipData.role.toLowerCase();
+        const userId = membershipData.public_user_data.user_id;
+        const firstName = membershipData.public_user_data.first_name || "";
+        const lastName = membershipData.public_user_data.last_name || "";
+        const name = `${firstName} ${lastName}`.trim();
 
         console.log("Processing organization membership:", {
-          userId: membershipData.public_user_data.user_id,
-          role: role,
+          userId,
+          role,
+          name,
         });
 
-        // Update user's role in our database based on their organization role
-        await prisma.user.update({
-          where: { id: membershipData.public_user_data.user_id },
-          data: {
-            role: role === "admin" ? "ADMIN" : "USER",
-          },
+        // Check if user exists first
+        const existingUser = await prisma.user.findUnique({
+          where: { id: userId },
         });
+
+        if (existingUser) {
+          // Update user's role if they exist
+          await prisma.user.update({
+            where: { id: userId },
+            data: {
+              role: role === "admin" ? "ADMIN" : "USER",
+              name: name || existingUser.name, // Only update name if we have a new one
+            },
+          });
+        } else {
+          // For new users, we'll need to wait for the user.created event
+          // to get their email address
+          console.log(
+            "User not found in database, waiting for user.created event"
+          );
+        }
         break;
       }
 
