@@ -65,7 +65,7 @@ export default async function Dashboard() {
 
         <section className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-xl font-semibold mb-4">PTO Requests</h2>
-          <PTORequestList requests={user.ptoRequests} userId={user.id} />
+          <PTORequestList requests={user.ptoRequests} />
         </section>
       </div>
     </div>

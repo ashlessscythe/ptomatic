@@ -40,14 +40,16 @@
    - [x] Department-wide PTO statistics and request tracking
 - [x] Deploy and test functionality with managers and department approvers.
 
-## Notifications & Reporting (Tollgate 4 - Notifications, Resend Feature & Reporting)
+## Notifications & Reporting (Tollgate 4 - Current Focus)
 - [ ] Implement notification system:
+   - [x] Email notifications for key actions (e.g., request submission, status updates).
    - [ ] In-app notifications for real-time updates.
-   - [ ] Email notifications for key actions (e.g., request submission, status updates).
    - [ ] (Resend) option for emails in the Admin Panel.
 - [ ] Build basic reporting and insights:
-   - [ ] PTO usage trends, requests by department, and balance adjustments.
-   - [ ] Exportable reports for admin use.
+   - [ ] PTO usage trends by department
+   - [ ] Balance adjustment history
+   - [ ] Request approval statistics
+   - [ ] Exportable reports for admin use
 - [ ] Deploy for testing notifications and reporting functions.
 
 ## Migration & Final Testing (Tollgate 5 - Data Migration & Final Refinements)

@@ -4,9 +4,14 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/components/auth/SessionProvider";
 import { Role } from "@prisma/client";
+import { signOut } from "next-auth/react";
 
 const Header = () => {
   const { session } = useSession();
+
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: process.env.NEXT_PUBLIC_BASE_URL });
+  };
 
   const getRoleBasedLinks = () => {
     if (!session?.user) return null;
@@ -68,11 +73,9 @@ const Header = () => {
         {session ? (
           <div className="flex items-center gap-4">
             <span>{session.user.name}</span>
-            <form action="/api/auth/signout" method="POST">
-              <Button type="submit" variant="outline">
-                Sign out
-              </Button>
-            </form>
+            <Button onClick={handleSignOut} variant="outline">
+              Sign out
+            </Button>
           </div>
         ) : (
           <Link href="/auth/signin">

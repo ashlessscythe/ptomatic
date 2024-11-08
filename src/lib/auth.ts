@@ -149,7 +149,10 @@ export const authOptions: NextAuthOptions = {
           throw new Error("User not found");
         }
 
-        if (currentUser.role !== token.role || currentUser.status !== token.status) {
+        if (
+          currentUser.role !== token.role ||
+          currentUser.status !== token.status
+        ) {
           // Force sign out if role or status has changed
           throw new Error("User role or status has changed");
         }
@@ -166,6 +169,19 @@ export const authOptions: NextAuthOptions = {
           status: token.status as UserStatus,
         },
       };
+    },
+    async redirect({ url, baseUrl }) {
+      // Allows relative callback URLs
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      // Allows callback URLs on the same origin
+      else if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
+    },
+  },
+  events: {
+    async signOut() {
+      // The signOut event is triggered when a user signs out
+      // We don't need to do anything here as the redirect is handled by the redirect callback
     },
   },
   debug: process.env.NODE_ENV === "development",

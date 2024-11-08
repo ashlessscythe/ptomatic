@@ -1,59 +1,37 @@
-import * as React from "react";
+import { formatDate } from "@/lib/utils";
 
 interface PTORequestEmailProps {
   userName: string;
   startDate: Date;
   endDate: Date;
-  status?: "PENDING" | "APPROVED" | "DENIED";
+  status?: string;
   notes?: string;
 }
 
-export const PTORequestEmail: React.FC<Readonly<PTORequestEmailProps>> = ({
+export function PTORequestEmail({
   userName,
   startDate,
   endDate,
   status = "PENDING",
   notes,
-}) => (
-  <div>
-    <h1>PTO Request {status === "PENDING" ? "Submitted" : status}</h1>
-    <p>Hi {userName},</p>
-
-    {status === "PENDING" ? (
-      <p>Your PTO request has been submitted for review:</p>
-    ) : (
-      <p>Your PTO request has been {status.toLowerCase()}:</p>
-    )}
-
-    <div
-      style={{
-        margin: "20px 0",
-        padding: "20px",
-        backgroundColor: "#f9fafb",
-        borderRadius: "8px",
-      }}
-    >
+}: PTORequestEmailProps) {
+  return (
+    <div>
+      <h1>PTO Request {status.toLowerCase()}</h1>
+      <p>Hello {userName},</p>
+      <p>Your PTO request has been {status.toLowerCase()}.</p>
       <p>
-        <strong>Start Date:</strong> {startDate.toLocaleDateString()}
+        <strong>Start Date:</strong> {formatDate(startDate)}
       </p>
       <p>
-        <strong>End Date:</strong> {endDate.toLocaleDateString()}
+        <strong>End Date:</strong> {formatDate(endDate)}
       </p>
       {notes && (
         <p>
           <strong>Notes:</strong> {notes}
         </p>
       )}
+      <p>Thank you for using PTO-matic!</p>
     </div>
-
-    {status === "PENDING" && (
-      <p>You will be notified when your request has been reviewed.</p>
-    )}
-
-    {status === "APPROVED" && <p>Enjoy your time off!</p>}
-
-    {status === "DENIED" && (
-      <p>Please contact your manager if you have any questions.</p>
-    )}
-  </div>
-);
+  );
+}

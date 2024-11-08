@@ -10,6 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { formatDate } from "@/lib/utils";
 import { updateRequestStatus } from "../actions";
 import { useState } from "react";
 import type { User, PTORequest } from "@prisma/client";
@@ -53,14 +54,6 @@ export default function TeamPTORequests({
     } finally {
       setUpdating(null);
     }
-  };
-
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
   };
 
   return (

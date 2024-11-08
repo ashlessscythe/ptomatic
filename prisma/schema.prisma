@@ -15,10 +15,10 @@ model User {
   email       String       @unique
   name        String
   password    String
-  role        Role         @default(USER)
-  status      UserStatus   @default(PENDING)
-  ptoBalance  Int          @default(0)
-  department  Department?  @relation("DepartmentToUsers", fields: [departmentId], references: [id])
+  role        Role        @default(USER)
+  status      UserStatus  @default(PENDING)
+  ptoBalance  Int         @default(0)
+  department  Department? @relation("DepartmentToUsers", fields: [departmentId], references: [id])
   departmentId String?
   manager     User?       @relation("UserToManager", fields: [managerId], references: [id])
   managerId   String?
@@ -27,6 +27,7 @@ model User {
   createdAt   DateTime    @default(now())
   auditLogs   AuditLog[]
   approvedDepartments Department[] @relation("DepartmentToApprover")
+  managedDepartments Department[] @relation("DepartmentToManager")
   accounts    Account[]
   sessions    Session[]
 }
@@ -71,6 +72,8 @@ model Department {
   name        String
   approver    User?     @relation("DepartmentToApprover", fields: [approverId], references: [id])
   approverId  String?
+  manager     User?     @relation("DepartmentToManager", fields: [managerId], references: [id])
+  managerId   String?
   users       User[]    @relation("DepartmentToUsers")
   createdAt   DateTime  @default(now())
 }

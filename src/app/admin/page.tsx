@@ -1,7 +1,11 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { PrismaClient, Role } from "@prisma/client";
-import { Button } from "@/components/ui/button";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { DepartmentRow } from "./components/DepartmentRow";
+import { UserRow } from "./components/UserRow";
+import { PTORequestManager } from "./components/PTORequestManager";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -9,153 +13,138 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { UserRow } from "./components/UserRow";
-import { DepartmentRow } from "./components/DepartmentRow";
-import { PTORequestManager } from "./components/PTORequestManager";
-import { createDepartment, deleteDepartment } from "./actions";
-import { authOptions } from "@/lib/auth";
 import { AddUserModal } from "./components/AddUserModal";
+import type { Department, User } from "@prisma/client";
 
-const prisma = new PrismaClient();
+type UserBasicInfo = {
+  id: string;
+  name: string;
+  email: string;
+};
 
-export default async function AdminDashboard() {
+type DepartmentWithRelations = Department & {
+  _count: { users: number };
+  approver: UserBasicInfo | null;
+  manager: UserBasicInfo | null;
+  users: UserBasicInfo[];
+};
+
+type UserWithDepartment = User & {
+  department: Department | null;
+  ptoRequests: {
+    id: string;
+    startDate: Date;
+    endDate: Date;
+    status: string;
+    notes: string | null;
+  }[];
+};
+
+export default async function AdminPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user?.id) {
-    redirect("/");
+  if (!session?.user) {
+    redirect("/auth/signin");
   }
 
-  // Get the user's role from our database
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { email: session.user.email },
   });
 
-  // If not an admin, redirect to home
-  if (user?.role !== Role.ADMIN) {
-    redirect("/");
+  if (!user || user.role !== "ADMIN") {
+    redirect("/dashboard");
   }
 
-  // Get all users and their departments
+  // Get all users with their departments
   const users = await prisma.user.findMany({
     include: {
       department: true,
+      ptoRequests: true,
     },
-    orderBy: { createdAt: "desc" },
+    orderBy: {
+      createdAt: "desc",
+    },
   });
 
-  // Get all departments
-  const departments = await prisma.department.findMany({
-    orderBy: { name: "asc" },
-  });
-
-  // Get all PTO requests with user and department info
-  const ptoRequests = await prisma.pTORequest.findMany({
+  // Get all departments with user count and current manager/approver
+  const departments = (await prisma.department.findMany({
     include: {
-      user: {
-        include: {
-          department: true,
+      users: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      approver: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      manager: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      _count: {
+        select: {
+          users: true,
         },
       },
     },
-    orderBy: { createdAt: "desc" },
+  })) as DepartmentWithRelations[];
+
+  // Get managers and approvers for department assignments
+  const managers = await prisma.user.findMany({
+    where: { role: "MANAGER" },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+    },
   });
 
-  const pendingRequestsCount = ptoRequests.filter(
-    (req) => req.status === "PENDING"
-  ).length;
+  const approvers = await prisma.user.findMany({
+    where: { role: "APPROVER" },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+    },
+  });
 
-  // Convert Role enum to array for components
-  const roleValues = Object.values(Role);
+  // Get all PTO requests with user details
+  const requests = await prisma.pTORequest.findMany({
+    include: {
+      user: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
-        <div className="grid grid-cols-3 gap-4">
-          <div className="bg-white p-4 rounded-lg shadow">
-            <p className="text-sm text-neutral-600">Total Users</p>
-            <p className="text-2xl font-semibold">{users.length}</p>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <p className="text-sm text-neutral-600">Departments</p>
-            <p className="text-2xl font-semibold">{departments.length}</p>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <p className="text-sm text-neutral-600">Pending Requests</p>
-            <p className="text-2xl font-semibold">{pendingRequestsCount}</p>
-          </div>
-        </div>
-      </div>
+    <div className="container mx-auto py-6 space-y-6">
+      <h1 className="text-2xl font-bold">Admin Panel</h1>
 
-      <div className="space-y-6">
-        <section className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">PTO Requests</h2>
-          <PTORequestManager requests={ptoRequests} />
-        </section>
-
-        <section className="bg-white p-6 rounded-lg shadow">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Users</h2>
-            <AddUserModal roles={roleValues} />
-          </div>
-
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>PTO Balance</TableHead>
-                  <TableHead>Department</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users.map((user) => (
-                  <UserRow
-                    key={user.id}
-                    user={user}
-                    departments={departments}
-                    roles={roleValues}
-                  />
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </section>
-
-        <section className="bg-white p-6 rounded-lg shadow">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Departments</h2>
-            <form
-              action={async (formData: FormData) => {
-                "use server";
-                const name = formData.get("name");
-                if (typeof name === "string" && name.trim()) {
-                  await createDepartment(name.trim());
-                }
-              }}
-            >
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="Department name"
-                  className="px-2 py-1 border rounded"
-                  required
-                />
-                <Button type="submit">Add Department</Button>
-              </div>
-            </form>
-          </div>
-
-          <div className="rounded-md border">
+      <div className="grid gap-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Departments</CardTitle>
+            <AddUserModal />
+          </CardHeader>
+          <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Users</TableHead>
+                  <TableHead>Manager</TableHead>
+                  <TableHead>Approver</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -164,17 +153,60 @@ export default async function AdminDashboard() {
                   <DepartmentRow
                     key={department.id}
                     department={department}
-                    userCount={
-                      users.filter((u) => u.departmentId === department.id)
-                        .length
-                    }
-                    onDelete={deleteDepartment}
+                    userCount={department._count.users}
+                    managers={managers}
+                    approvers={approvers}
+                    currentManager={department.manager}
+                    currentApprover={department.approver}
+                    onDelete={async (id) => {
+                      "use server";
+                      try {
+                        await prisma.department.delete({ where: { id } });
+                        return { success: true };
+                      } catch (error) {
+                        return {
+                          success: false,
+                          error: "Failed to delete department",
+                        };
+                      }
+                    }}
                   />
                 ))}
               </TableBody>
             </Table>
-          </div>
-        </section>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Users</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Department</TableHead>
+                  <TableHead>PTO Balance</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {users.map((user) => (
+                  <UserRow
+                    key={user.id}
+                    user={user as UserWithDepartment}
+                    departments={departments}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+
+        <PTORequestManager requests={requests} />
       </div>
     </div>
   );

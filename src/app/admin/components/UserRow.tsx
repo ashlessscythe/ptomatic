@@ -3,37 +3,79 @@
 import { Button } from "@/components/ui/button";
 import { TableCell, TableRow } from "@/components/ui/table";
 import {
-  deleteUser,
-  assignDepartment,
-  assignRole,
-  updatePTOBalance,
-} from "../actions";
-import { Department, User, Role } from "@prisma/client";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Department, Role, User } from "@prisma/client";
 import { useState } from "react";
-
-type UserWithDepartment = User & {
-  department: Department | null;
-};
+import {
+  assignRole,
+  assignDepartment,
+  updatePTOBalance,
+  deleteUser,
+} from "../actions";
 
 interface UserRowProps {
-  user: UserWithDepartment;
+  user: User & {
+    department: Department | null;
+  };
   departments: Department[];
-  roles: Role[];
 }
 
-export function UserRow({ user, departments, roles }: UserRowProps) {
-  const [isUpdatingPTO, setIsUpdatingPTO] = useState(false);
-  const [isAssigningDept, setIsAssigningDept] = useState(false);
-  const [isAssigningRole, setIsAssigningRole] = useState(false);
+export function UserRow({ user, departments }: UserRowProps) {
+  const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [ptoBalance, setPTOBalance] = useState(user.ptoBalance.toString());
 
-  const handlePTOUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsUpdatingPTO(true);
+  const roles: Role[] = ["USER", "MANAGER", "APPROVER", "ADMIN"];
+
+  const handleRoleChange = async (role: Role) => {
+    setIsUpdating(true);
     try {
-      const form = e.target as HTMLFormElement;
-      const formData = new FormData(form);
-      const balance = parseInt(formData.get("ptoBalance") as string);
+      const result = await assignRole(user.id, role);
+      if (!result.success && result.error) {
+        alert(result.error);
+      }
+    } catch (error) {
+      console.error("Error updating role:", error);
+      alert("Failed to update role");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleDepartmentChange = async (departmentId: string) => {
+    setIsUpdating(true);
+    if (departmentId == "none") {
+      alert("No Department Selected, no change made");
+      setIsUpdating(false);
+      return;
+    }
+    try {
+      const result = await assignDepartment(user.id, departmentId);
+      if (!result.success && result.error) {
+        alert(result.error);
+      }
+    } catch (error) {
+      console.error("Error updating department:", error);
+      alert(`Failed to update department. ${departmentId}`);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handlePTOBalanceChange = async () => {
+    const balance = parseInt(ptoBalance);
+    if (isNaN(balance)) {
+      alert("Please enter a valid number");
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
       const result = await updatePTOBalance(user.id, balance);
       if (!result.success && result.error) {
         alert(result.error);
@@ -42,47 +84,7 @@ export function UserRow({ user, departments, roles }: UserRowProps) {
       console.error("Error updating PTO balance:", error);
       alert("Failed to update PTO balance");
     } finally {
-      setIsUpdatingPTO(false);
-    }
-  };
-
-  const handleRoleAssign = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsAssigningRole(true);
-    try {
-      const form = e.target as HTMLFormElement;
-      const formData = new FormData(form);
-      const role = formData.get("userRole") as Role;
-      const result = await assignRole(user.id, role);
-      if (!result.success && result.error) {
-        alert(result.error);
-      }
-    } catch (error) {
-      console.error("Error assigning role:", error);
-      alert("Failed to assign role");
-    } finally {
-      setIsAssigningRole(false);
-    }
-  };
-
-  const handleDepartmentAssign = async (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
-    e.preventDefault();
-    setIsAssigningDept(true);
-    try {
-      const form = e.target as HTMLFormElement;
-      const formData = new FormData(form);
-      const deptId = formData.get("departmentId") as string;
-      const result = await assignDepartment(user.id, deptId);
-      if (!result.success && result.error) {
-        alert(result.error);
-      }
-    } catch (error) {
-      console.error("Error assigning department:", error);
-      alert("Failed to assign department");
-    } finally {
-      setIsAssigningDept(false);
+      setIsUpdating(false);
     }
   };
 
@@ -90,6 +92,7 @@ export function UserRow({ user, departments, roles }: UserRowProps) {
     if (!confirm("Are you sure you want to delete this user?")) {
       return;
     }
+
     setIsDeleting(true);
     try {
       const result = await deleteUser(user.id);
@@ -109,84 +112,70 @@ export function UserRow({ user, departments, roles }: UserRowProps) {
       <TableCell>{user.name}</TableCell>
       <TableCell>{user.email}</TableCell>
       <TableCell>
-        <form className="flex items-center gap-2" onSubmit={handleRoleAssign}>
-          <select
-            name="userRole"
-            defaultValue={user.role}
-            className="px-2 py-1 border rounded"
-          >
-            {Object.values(Role).map((role) => (
-              <option key={role} value={role}>
-                {role}
-              </option>
-            ))}
-          </select>
-          <Button
-            type="submit"
-            variant="outline"
-            size="sm"
-            disabled={isAssigningRole}
-          >
-            {isAssigningRole ? "Updating..." : "Update Role"}
-          </Button>
-        </form>
-      </TableCell>
-      <TableCell>
-        <form className="flex items-center gap-2" onSubmit={handlePTOUpdate}>
-          <input
-            type="number"
-            name="ptoBalance"
-            defaultValue={user.ptoBalance}
-            className="w-20 px-2 py-1 border rounded"
-          />
-          <Button
-            type="submit"
-            variant="outline"
-            size="sm"
-            disabled={isUpdatingPTO}
-          >
-            {isUpdatingPTO ? "Updating..." : "Update"}
-          </Button>
-        </form>
-      </TableCell>
-      <TableCell>
-        <form
-          className="flex items-center gap-2"
-          onSubmit={handleDepartmentAssign}
+        <Select
+          value={user.role}
+          onValueChange={(value) => handleRoleChange(value as Role)}
+          disabled={isUpdating || user.email === "bob@bob.bob"}
         >
-          <select
-            name="departmentId"
-            defaultValue={user.departmentId || ""}
-            className="px-2 py-1 border rounded"
-          >
-            <option value="">No Department</option>
-            {departments.map((dept) => (
-              <option key={dept.id} value={dept.id}>
-                {dept.name}
-              </option>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select role" />
+          </SelectTrigger>
+          <SelectContent>
+            {roles.map((role) => (
+              <SelectItem key={role} value={role}>
+                {role}
+              </SelectItem>
             ))}
-          </select>
-          <Button
-            type="submit"
-            variant="outline"
-            size="sm"
-            disabled={isAssigningDept}
-          >
-            {isAssigningDept ? "Assigning..." : "Assign"}
-          </Button>
-        </form>
+          </SelectContent>
+        </Select>
+      </TableCell>
+      <TableCell>
+        <Select
+          value={user.departmentId || ""}
+          onValueChange={handleDepartmentChange}
+          disabled={isUpdating}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select department" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">None</SelectItem>
+            {departments.map((dept) => (
+              <SelectItem key={dept.id} value={dept.id}>
+                {dept.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </TableCell>
       <TableCell>
         <div className="flex items-center gap-2">
+          <input
+            type="number"
+            value={ptoBalance}
+            onChange={(e) => setPTOBalance(e.target.value)}
+            className="w-20 px-2 py-1 border rounded"
+            disabled={isUpdating}
+          />
           <Button
-            onClick={handleDelete}
-            variant="destructive"
+            onClick={handlePTOBalanceChange}
+            variant="outline"
             size="sm"
-            disabled={isDeleting}
+            disabled={isUpdating || user.ptoBalance === parseInt(ptoBalance)}
           >
-            {isDeleting ? "Deleting..." : "Delete"}
+            Update
           </Button>
         </div>
+      </TableCell>
+      <TableCell>
+        <Button
+          onClick={handleDelete}
+          variant="destructive"
+          size="sm"
+          disabled={isDeleting || user.email === "bob@bob.bob"}
+        >
+          {isDeleting ? "Deleting..." : "Delete"}
+        </Button>
       </TableCell>
     </TableRow>
   );

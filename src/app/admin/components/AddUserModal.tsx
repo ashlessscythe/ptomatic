@@ -12,9 +12,11 @@ import {
 } from "@/components/ui/dialog";
 import { createUser } from "../actions";
 
-export function AddUserModal({ roles }: { roles: Role[] }) {
+export function AddUserModal() {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const roles = Object.values(Role);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

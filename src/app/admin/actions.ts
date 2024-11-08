@@ -1,10 +1,42 @@
 "use server";
 
-import { PrismaClient, Role } from "@prisma/client";
+import { PrismaClient, Role, RequestStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { hash } from "bcryptjs";
+import { sendPTOEmail } from "@/lib/sendEmail";
 
 const prisma = new PrismaClient();
+
+export async function updateRequestStatus(
+  requestId: string,
+  status: RequestStatus
+) {
+  try {
+    const request = await prisma.pTORequest.update({
+      where: { id: requestId },
+      data: { status },
+      include: {
+        user: true,
+      },
+    });
+
+    // Send email notification
+    await sendPTOEmail({
+      to: request.user.email,
+      userName: request.user.name,
+      startDate: request.startDate,
+      endDate: request.endDate,
+      status: status,
+      notes: `Your PTO request has been ${status.toLowerCase()} by the admin.`,
+    });
+
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating request status:", error);
+    return { success: false, error: "Failed to update request status" };
+  }
+}
 
 export async function createUser(
   name: string,
@@ -69,6 +101,50 @@ export async function assignDepartment(userId: string, departmentId: string) {
   } catch (error) {
     console.error("Error assigning department:", error);
     return { success: false, error: "Failed to assign department" };
+  }
+}
+
+export async function assignDepartmentManager(
+  departmentId: string,
+  managerId: string
+) {
+  try {
+    // First, remove this manager from any other departments they might manage
+    await prisma.department.updateMany({
+      where: { managerId },
+      data: { managerId: null },
+    });
+
+    // Then assign them to the new department
+    await prisma.department.update({
+      where: { id: departmentId },
+      data: { managerId: managerId || null },
+    });
+
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (error) {
+    console.error("Error assigning department manager:", error);
+    return { success: false, error: "Failed to assign department manager" };
+  }
+}
+
+export async function assignDepartmentApprover(
+  departmentId: string,
+  approverId: string
+) {
+  try {
+    // Update the department's approver
+    await prisma.department.update({
+      where: { id: departmentId },
+      data: { approverId: approverId || null },
+    });
+
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (error) {
+    console.error("Error assigning department approver:", error);
+    return { success: false, error: "Failed to assign department approver" };
   }
 }
 
