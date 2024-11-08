@@ -26,6 +26,10 @@
    - [x] **Managers to Users** (one-to-many)
    - [x] **Approvers to Departments** (many-to-one)
    - [x] **Users to Departments** (many-to-one)
+- [x] Implement role-based navigation:
+   - [x] Header links for different user roles (Admin, Manager, Approver, User)
+   - [x] Role-specific landing pages and redirects
+   - [x] Improved user management with modal-based user creation
 - [ ] Develop Manager Dashboard:
    - [ ] Managers can view PTO requests and balances for their team.
 - [ ] Build Department Approver functionality:

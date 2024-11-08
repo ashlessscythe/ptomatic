@@ -1,21 +1,33 @@
 "use server";
 
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Role } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { hash } from "bcryptjs";
 
 const prisma = new PrismaClient();
 
-export async function makeUserAdmin(userId: string) {
+export async function createUser(
+  name: string,
+  email: string,
+  password: string,
+  role: Role
+) {
   try {
-    await prisma.user.update({
-      where: { id: userId },
-      data: { role: "ADMIN" },
+    const hashedPassword = await hash(password, 10);
+    await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        role,
+        status: "ACTIVE", // Since admin is creating, set as active
+      },
     });
     revalidatePath("/admin");
     return { success: true };
   } catch (error) {
-    console.error("Error making user admin:", error);
-    return { success: false, error: "Failed to update user role" };
+    console.error("Error creating user:", error);
+    return { success: false, error: "Failed to create user" };
   }
 }
 
@@ -29,6 +41,20 @@ export async function deleteUser(userId: string) {
   } catch (error) {
     console.error("Error deleting user:", error);
     return { success: false, error: "Failed to delete user" };
+  }
+}
+
+export async function assignRole(userId: string, role: Role) {
+  try {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { role },
+    });
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (error) {
+    console.error("Error assigning role:", error);
+    return { success: false, error: "Failed to assign role" };
   }
 }
 

@@ -3,12 +3,12 @@
 import { Button } from "@/components/ui/button";
 import { TableCell, TableRow } from "@/components/ui/table";
 import {
-  makeUserAdmin,
   deleteUser,
   assignDepartment,
+  assignRole,
   updatePTOBalance,
 } from "../actions";
-import { Department, User } from "@prisma/client";
+import { Department, User, Role } from "@prisma/client";
 import { useState } from "react";
 
 type UserWithDepartment = User & {
@@ -18,12 +18,13 @@ type UserWithDepartment = User & {
 interface UserRowProps {
   user: UserWithDepartment;
   departments: Department[];
+  roles: Role[];
 }
 
-export function UserRow({ user, departments }: UserRowProps) {
+export function UserRow({ user, departments, roles }: UserRowProps) {
   const [isUpdatingPTO, setIsUpdatingPTO] = useState(false);
   const [isAssigningDept, setIsAssigningDept] = useState(false);
-  const [isMakingAdmin, setIsMakingAdmin] = useState(false);
+  const [isAssigningRole, setIsAssigningRole] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handlePTOUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -45,6 +46,25 @@ export function UserRow({ user, departments }: UserRowProps) {
     }
   };
 
+  const handleRoleAssign = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsAssigningRole(true);
+    try {
+      const form = e.target as HTMLFormElement;
+      const formData = new FormData(form);
+      const role = formData.get("userRole") as Role;
+      const result = await assignRole(user.id, role);
+      if (!result.success && result.error) {
+        alert(result.error);
+      }
+    } catch (error) {
+      console.error("Error assigning role:", error);
+      alert("Failed to assign role");
+    } finally {
+      setIsAssigningRole(false);
+    }
+  };
+
   const handleDepartmentAssign = async (
     e: React.FormEvent<HTMLFormElement>
   ) => {
@@ -63,21 +83,6 @@ export function UserRow({ user, departments }: UserRowProps) {
       alert("Failed to assign department");
     } finally {
       setIsAssigningDept(false);
-    }
-  };
-
-  const handleMakeAdmin = async () => {
-    setIsMakingAdmin(true);
-    try {
-      const result = await makeUserAdmin(user.id);
-      if (!result.success && result.error) {
-        alert(result.error);
-      }
-    } catch (error) {
-      console.error("Error making user admin:", error);
-      alert("Failed to make user admin");
-    } finally {
-      setIsMakingAdmin(false);
     }
   };
 
@@ -103,7 +108,29 @@ export function UserRow({ user, departments }: UserRowProps) {
     <TableRow>
       <TableCell>{user.name}</TableCell>
       <TableCell>{user.email}</TableCell>
-      <TableCell>{user.role}</TableCell>
+      <TableCell>
+        <form className="flex items-center gap-2" onSubmit={handleRoleAssign}>
+          <select
+            name="userRole"
+            defaultValue={user.role}
+            className="px-2 py-1 border rounded"
+          >
+            {Object.values(Role).map((role) => (
+              <option key={role} value={role}>
+                {role}
+              </option>
+            ))}
+          </select>
+          <Button
+            type="submit"
+            variant="outline"
+            size="sm"
+            disabled={isAssigningRole}
+          >
+            {isAssigningRole ? "Updating..." : "Update Role"}
+          </Button>
+        </form>
+      </TableCell>
       <TableCell>
         <form className="flex items-center gap-2" onSubmit={handlePTOUpdate}>
           <input
@@ -151,16 +178,6 @@ export function UserRow({ user, departments }: UserRowProps) {
       </TableCell>
       <TableCell>
         <div className="flex items-center gap-2">
-          {user.role === "USER" && (
-            <Button
-              onClick={handleMakeAdmin}
-              variant="outline"
-              size="sm"
-              disabled={isMakingAdmin}
-            >
-              {isMakingAdmin ? "Updating..." : "Make Admin"}
-            </Button>
-          )}
           <Button
             onClick={handleDelete}
             variant="destructive"

@@ -14,11 +14,27 @@ A modern PTO (Paid Time Off) management system built with Next.js, featuring SSO
 
 ## Features
 
-- **auth stuff goes here**
+- **Authentication & Authorization**:
+
+  - NextAuth integration with credentials provider
+  - Role-based access control
+  - Secure session management
+  - User status tracking (Active/Pending)
 
 - **Role-Based Access**:
 
+  - Dynamic navigation based on user roles
   - Support for Users, Managers, Approvers, and Admins
+  - Role-specific landing pages and features
+  - Comprehensive user management system
+
+- **Admin Features**:
+
+  - User management with modal-based creation
+  - Role assignment and updates
+  - Department management
+  - PTO balance administration
+  - Request oversight
 
 - **PTO Management**:
 
@@ -31,6 +47,7 @@ A modern PTO (Paid Time Off) management system built with Next.js, featuring SSO
 
   - Organize users and approvers by department
   - Department-specific approval flows
+  - Hierarchical management structure
 
 - **Email Notifications**:
   - React-based email templates
@@ -82,6 +99,9 @@ src/
 │   ├── api/         # API routes
 │   └── dashboard/   # User dashboard
 ├── components/      # Reusable UI components
+│   ├── auth/        # Authentication components
+│   ├── ui/          # UI components (ShadCN)
+│   └── emails/      # Email templates
 ├── lib/            # Utility functions
 └── prisma/         # Database schema and migrations
 ```
@@ -93,6 +113,10 @@ The project is being developed in phases (tollgates):
 1. ✅ Initial Setup & Basic Authentication
 2. ✅ User & Admin Workflows
 3. 🚧 Manager & Approver Roles
+   - ✅ Role-based navigation
+   - ✅ User management improvements
+   - 🚧 Manager dashboard
+   - 🚧 Approver functionality
 4. 📅 Notifications & Reporting
 5. 📅 Migration & Testing
 6. 📅 Production Release

@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Role } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -14,6 +14,7 @@ import { DepartmentRow } from "./components/DepartmentRow";
 import { PTORequestManager } from "./components/PTORequestManager";
 import { createDepartment, deleteDepartment } from "./actions";
 import { authOptions } from "@/lib/auth";
+import { AddUserModal } from "./components/AddUserModal";
 
 const prisma = new PrismaClient();
 
@@ -30,7 +31,7 @@ export default async function AdminDashboard() {
   });
 
   // If not an admin, redirect to home
-  if (user?.role !== "ADMIN") {
+  if (user?.role !== Role.ADMIN) {
     redirect("/");
   }
 
@@ -63,6 +64,9 @@ export default async function AdminDashboard() {
     (req) => req.status === "PENDING"
   ).length;
 
+  // Convert Role enum to array for components
+  const roleValues = Object.values(Role);
+
   return (
     <div className="p-8">
       <div className="mb-8">
@@ -90,7 +94,11 @@ export default async function AdminDashboard() {
         </section>
 
         <section className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">Users</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Users</h2>
+            <AddUserModal roles={roleValues} />
+          </div>
+
           <div className="rounded-md border">
             <Table>
               <TableHeader>
@@ -109,6 +117,7 @@ export default async function AdminDashboard() {
                     key={user.id}
                     user={user}
                     departments={departments}
+                    roles={roleValues}
                   />
                 ))}
               </TableBody>
