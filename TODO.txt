@@ -20,7 +20,7 @@
 - [x] Set up email notifications with Resend and add templates for notifications.
 - [x] Deploy for testing and gather feedback on the user and admin workflows.
 
-## Manager & Approver Roles (Tollgate 3 - Role-Based Access & Manager Approvals)
+## Manager & Approver Roles (Tollgate 3 - Role-Based Access & Manager Approvals) ✅
 - [x] Add role-based access to the app (User, Admin, Manager, Approver).
 - [x] Update database schema to include relationships:
    - [x] **Managers to Users** (one-to-many)
@@ -30,11 +30,15 @@
    - [x] Header links for different user roles (Admin, Manager, Approver, User)
    - [x] Role-specific landing pages and redirects
    - [x] Improved user management with modal-based user creation
-- [ ] Develop Manager Dashboard:
-   - [ ] Managers can view PTO requests and balances for their team.
-- [ ] Build Department Approver functionality:
-   - [ ] Approvers handle PTO requests within their department only.
-- [ ] Deploy and test functionality with managers and department approvers.
+- [x] Develop Manager Dashboard:
+   - [x] Managers can view PTO requests and balances for their team
+   - [x] Admin access to view all teams' requests and balances
+   - [x] Team PTO usage tracking and low balance warnings
+- [x] Build Department Approver functionality:
+   - [x] Approvers handle PTO requests within their department only
+   - [x] Admin access to view all departments' requests
+   - [x] Department-wide PTO statistics and request tracking
+- [x] Deploy and test functionality with managers and department approvers.
 
 ## Notifications & Reporting (Tollgate 4 - Notifications, Resend Feature & Reporting)
 - [ ] Implement notification system:
