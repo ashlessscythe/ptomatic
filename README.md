@@ -6,7 +6,7 @@ A modern PTO (Paid Time Off) management system built with Next.js, featuring SSO
 
 - **Frontend**: Next.js 14 with TypeScript
 - **UI Components**: ShadCN UI (Tailwind CSS)
-- **Authentication**: Clerk.dev with SSO support
+- **Authentication**: NextAuth
 - **Database**: PostgreSQL (Neon.tech)
 - **ORM**: Prisma
 - **Email**: Resend with React email templates
@@ -14,16 +14,11 @@ A modern PTO (Paid Time Off) management system built with Next.js, featuring SSO
 
 ## Features
 
-- **SSO Authentication**:
-
-  - Secure login via Google and other providers
-  - Role synchronization with Clerk organizations
-  - Pending approval state for new users
+- **auth stuff goes here**
 
 - **Role-Based Access**:
 
   - Support for Users, Managers, Approvers, and Admins
-  - Automatic role sync with Clerk organization roles
 
 - **PTO Management**:
 
@@ -51,7 +46,6 @@ A modern PTO (Paid Time Off) management system built with Next.js, featuring SSO
 - Node.js 18+
 - npm/yarn
 - PostgreSQL database (we use Neon.tech)
-- Clerk.dev account
 - Resend account for email notifications
 
 ### Environment Setup
@@ -60,24 +54,9 @@ A modern PTO (Paid Time Off) management system built with Next.js, featuring SSO
 2. Copy `.env.example` to `.env` and fill in your credentials:
    ```
    DATABASE_URL=your_neon_db_url
-   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_pub_key
-   CLERK_SECRET_KEY=your_clerk_secret_key
-   CLERK_WEBHOOK_SECRET=your_webhook_secret
    RESEND_API_KEY=your_resend_api_key
+   AUTH_SECRET=supersecretstring
    ```
-
-### Clerk Webhook Setup
-
-1. Go to your Clerk Dashboard
-2. Navigate to Webhooks
-3. Add a new webhook endpoint: `your_domain/api/webhooks/clerk`
-4. Copy the signing secret to your .env file as CLERK_WEBHOOK_SECRET
-5. Enable the following events:
-   - user.created
-   - user.updated
-   - user.deleted
-   - organizationMembership.created
-   - organizationMembership.updated
 
 ### Installation
 

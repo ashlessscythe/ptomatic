@@ -1,21 +1,22 @@
-import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { PrismaClient } from "@prisma/client";
 import { PTORequestForm } from "./components/PTORequestForm";
 import { PTORequestList } from "./components/PTORequestList";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 const prisma = new PrismaClient();
 
 export default async function Dashboard() {
-  const { userId } = await auth();
+  const session = await getServerSession(authOptions);
 
-  if (!userId) {
+  if (!session?.user?.id) {
     redirect("/");
   }
 
   // Get user data including PTO requests and department
   const user = await prisma.user.findUnique({
-    where: { id: userId },
+    where: { id: session.user.id },
     include: {
       department: true,
       ptoRequests: {

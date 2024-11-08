@@ -10,7 +10,6 @@
 2. **Data Cleaning**: Ensure the data is formatted to match `pto-matic` schema.
 3. **Import Process**:
    - Use Prisma scripts to migrate data into Neon.tech.
-   - Assign Clerk user accounts based on existing emails.
 
 ## Post-Migration Checks
 

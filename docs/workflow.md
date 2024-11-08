@@ -2,7 +2,7 @@
 
 ## User Workflow
 
-1. **New User Registration**: Users sign up via Clerk SSO (or similar).
+1. **New User Registration**: Users sign up or sign in via local auth using NextAuth
 
    - Upon signup, new users are directed to a pending page.
    - Admins assign new users to departments and managers as part of the onboarding.

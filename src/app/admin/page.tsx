@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { PrismaClient } from "@prisma/client";
 import { Button } from "@/components/ui/button";
@@ -13,19 +13,20 @@ import { UserRow } from "./components/UserRow";
 import { DepartmentRow } from "./components/DepartmentRow";
 import { PTORequestManager } from "./components/PTORequestManager";
 import { createDepartment, deleteDepartment } from "./actions";
+import { authOptions } from "@/lib/auth";
 
 const prisma = new PrismaClient();
 
 export default async function AdminDashboard() {
-  const { userId } = await auth();
+  const session = await getServerSession(authOptions);
 
-  if (!userId) {
+  if (!session?.user?.id) {
     redirect("/");
   }
 
   // Get the user's role from our database
   const user = await prisma.user.findUnique({
-    where: { id: userId },
+    where: { id: session.user.id },
   });
 
   // If not an admin, redirect to home

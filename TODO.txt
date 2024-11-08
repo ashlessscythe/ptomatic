@@ -4,8 +4,6 @@
 - [x] Set up repository (`pto-matic`) and initialize with Next.js and Prisma.
 - [x] Install dependencies for Next.js, ShadCN UI, and Prisma.
 - [x] Configure environment variables (refer to `env.example`).
-- [x] Set up Neon.tech database and Clerk.dev for authentication.
-- [x] Implement Clerk SSO login and create a simple landing page with a pending screen for new users.
 - [x] Configure Prisma models for basic tables (`User`, `Department`, `PTORequest`) and run initial migration.
 - [x] Deploy the initial version to verify environment configuration and basic auth functionality.
 
@@ -23,11 +21,11 @@
 - [x] Deploy for testing and gather feedback on the user and admin workflows.
 
 ## Manager & Approver Roles (Tollgate 3 - Role-Based Access & Manager Approvals)
-- [ ] Add role-based access to the app (User, Admin, Manager, Approver).
-- [ ] Update database schema to include relationships:
-   - [ ] **Managers to Users** (one-to-many)
-   - [ ] **Approvers to Departments** (many-to-one)
-   - [ ] **Users to Departments** (many-to-one)
+- [x] Add role-based access to the app (User, Admin, Manager, Approver).
+- [x] Update database schema to include relationships:
+   - [x] **Managers to Users** (one-to-many)
+   - [x] **Approvers to Departments** (many-to-one)
+   - [x] **Users to Departments** (many-to-one)
 - [ ] Develop Manager Dashboard:
    - [ ] Managers can view PTO requests and balances for their team.
 - [ ] Build Department Approver functionality:
